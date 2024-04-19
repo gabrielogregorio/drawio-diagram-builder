@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { assemblerBaseStructure } from '../assemblerBaseStructure';
-import { escapeXmlValue, assembleBox, mountLine } from '../utils';
+import { escapeXmlValue, assembleBox, assembleLine, assembleImage, resizeMaintainingAspectRatio } from '../utils';
 import { Structure } from '../types';
-import { getBetterWidthForContent, getBetterHeightForContent } from './utils';
+import { getBetterWidthForContent, getBetterHeightForContent, addEmptyLines } from './utils';
 
 const DISTANCE_BLOCKS_DEFAULT = 300;
 
@@ -12,8 +12,21 @@ export const buildDrawIo = (connections: Structure[]) => {
 
   connections.forEach((connection) => {
     const width = getBetterWidthForContent(connection.displayName);
-    const height = getBetterHeightForContent(connection.displayName);
-    const yAlignedToCenter = 100 - height / 2;
+    const heightTemporaryToText = getBetterHeightForContent(connection.displayName);
+
+    let imageScaled: ReturnType<typeof resizeMaintainingAspectRatio> = {
+      width: 0,
+      height: 0,
+    };
+    if (connection.image) {
+      imageScaled = resizeMaintainingAspectRatio({
+        width: connection.image.width,
+        height: connection.image.height,
+        destinationWidth: width,
+      });
+    }
+    let finalHeight = heightTemporaryToText + imageScaled.height;
+    const yAlignedToCenter = 100 - finalHeight / 2;
 
     connectionsBuilded.push(
       assembleBox({
@@ -21,13 +34,25 @@ export const buildDrawIo = (connections: Structure[]) => {
         x: xSpacedVisuallyGood,
         y: yAlignedToCenter,
         width,
-        height,
-        displayName: escapeXmlValue(connection.displayName),
+        height: finalHeight,
+        displayName: escapeXmlValue(addEmptyLines(imageScaled.height - 20) + connection.displayName),
       }),
     );
 
+    if (connection.image) {
+      connectionsBuilded.push(
+        assembleImage({
+          image: connection.image,
+          x: xSpacedVisuallyGood,
+          y: yAlignedToCenter,
+          width: imageScaled.width,
+          height: imageScaled.height,
+        }),
+      );
+    }
+
     connection.connectedToIds.forEach((targetId) => {
-      connectionsBuilded.push(mountLine({ source: connection.id, target: targetId }));
+      connectionsBuilded.push(assembleLine({ source: connection.id, target: targetId }));
     });
 
     xSpacedVisuallyGood += DISTANCE_BLOCKS_DEFAULT + width;

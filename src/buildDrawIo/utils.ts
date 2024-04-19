@@ -1,6 +1,14 @@
 const HEIGTH_BY_LINE = 15;
 export const getBetterHeightForContent = (content: string) => {
-  return HEIGTH_BY_LINE * 4 + content.split('\n').length * HEIGTH_BY_LINE;
+  return HEIGTH_BY_LINE + content.split('\n').length * HEIGTH_BY_LINE;
+};
+
+export const addEmptyLines = (numberLines: number) => {
+  if (numberLines < 1) {
+    return '';
+  }
+
+  return new Array(Math.round(numberLines / HEIGTH_BY_LINE)).fill('\n').join('');
 };
 
 const WITH_BY_LINE = 7;
