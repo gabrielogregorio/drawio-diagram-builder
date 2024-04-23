@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Structure } from './types';
+import { instanceId } from './instanceId';
 
 type assembleBoxType = {
   x: number;
@@ -26,7 +27,7 @@ export const assembleBox = ({ x, y, id, width, height, displayName, alignLeft = 
 };
 
 export const assembleLine = ({ source, target }: { source: string; target: string }): string => {
-  const id = Math.random().toString();
+  const id = instanceId.getNextId();
   return `<mxCell id="${id}" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="${source}" target="${target}">
 <mxGeometry relative="1" as="geometry">
 </mxGeometry>
@@ -42,7 +43,7 @@ type assembleImageType = {
 };
 
 export const assembleImage = ({ image, width, height, x, y }: assembleImageType): string => {
-  const id = Math.random().toString();
+  const id = instanceId.getNextId();
   const base64 = encodeImageToBase64(image!.path);
   return `<mxCell id="${id}" value="" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=bottom;verticalAlign=top;image=data:image/png,${base64};imageBorder=none;" parent="1" vertex="1">
 <mxGeometry x="${x}" y="${y}" width="${width}" height="${height}" as="geometry"/>

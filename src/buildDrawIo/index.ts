@@ -1,16 +1,19 @@
 import fs from 'fs';
 import { assemblerBaseStructure } from '../assemblerBaseStructure';
 import { escapeXmlValue, assembleBox, assembleLine, assembleImage, resizeMaintainingAspectRatio } from '../utils';
-import { Structure } from '../types';
+import { BaseStructure } from '../types';
 import { getBetterWidthForContent, getBetterHeightForContent, addEmptyLines } from './utils';
+
+import sanitize from 'sanitize-filename';
+import path from 'path';
 
 const DISTANCE_BLOCKS_DEFAULT = 300;
 
-export const buildDrawIo = (connections: Structure[]) => {
+export const buildDrawIo = (base: BaseStructure) => {
   const connectionsBuilded: string[] = [];
   let xSpacedVisuallyGood = 100;
 
-  connections.forEach((connection) => {
+  base.connections.forEach((connection) => {
     const width = getBetterWidthForContent(connection.displayName);
     const heightTemporaryToText = getBetterHeightForContent(connection.displayName);
 
@@ -59,6 +62,5 @@ export const buildDrawIo = (connections: Structure[]) => {
   });
 
   const file = assemblerBaseStructure(connectionsBuilded.map((item) => item + '\n'));
-
-  fs.writeFileSync('./draw.drawio', file);
+  fs.writeFileSync(path.resolve(base.pathDocs, base.testFile, `${sanitize(base.testName)}.drawio`), file);
 };
